@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "PeekLink Companion",
+  "version": "0.1.0",
+  "description": "Opens links in Mini Chrome windows for PeekLink.",
+  "permissions": [
+    "contextMenus",
+    "storage",
+    "tabs",
+    "windows"
+  ],
+  "background": {
+    "service_worker": "service_worker.js",
+    "type": "module"
+  },
+  "commands": {
+    "open-current-tab-in-mini": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+M",
+        "mac": "Command+Shift+M"
+      },
+      "description": "Open the current tab in a Mini window"
+    }
+  },
+  "action": {
+    "default_title": "PeekLink"
+  }
+}
