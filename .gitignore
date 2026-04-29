@@ -1,0 +1,17 @@
+.DS_Store
+
+# macOS app build outputs
+apps/macos/.build/
+apps/macos/PeekLink.app/
+apps/macos/*.dSYM/
+
+# Chrome extension and app local clutter
+extension/.DS_Store
+extension/chrome/.DS_Store
+apps/.DS_Store
+apps/macos/.DS_Store
+
+# Swift / Xcode caches
+DerivedData/
+*.swiftpm
+Package.resolved

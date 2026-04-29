@@ -7,7 +7,9 @@
     "contextMenus",
     "storage",
     "tabs",
-    "windows"
+    "windows",
+    "system.display",
+    "webNavigation"
   ],
   "background": {
     "service_worker": "service_worker.js",
@@ -20,8 +22,29 @@
         "mac": "Command+Shift+M"
       },
       "description": "Open the current tab in a Mini window"
+    },
+    "promote-mini-window": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+P",
+        "mac": "Command+Shift+P"
+      },
+      "description": "Promote Mini window to Main Chrome"
+    },
+    "close-mini-window": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+W",
+        "mac": "Command+Shift+W"
+      },
+      "description": "Close Mini window"
     }
   },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": ["content.css"],
+      "js": ["content.js"]
+    }
+  ],
   "action": {
     "default_title": "PeekLink"
   }
