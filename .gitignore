@@ -15,3 +15,6 @@ apps/macos/.DS_Store
 DerivedData/
 *.swiftpm
 Package.resolved
+
+# Runtime logs
+log/
