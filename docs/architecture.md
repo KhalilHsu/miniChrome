@@ -11,6 +11,7 @@ macOS App
 
 Chrome Companion Extension
   -> runs inside the user's Chrome profile
+  -> receives URLs from a native messaging host
   -> opens URL in a popup window
   -> manages Close / Promote / Copy actions
   -> preserves cookies, extensions, and login state
@@ -44,6 +45,7 @@ Slack, Messages, Mail, Notion, Linear, and other apps before Chrome does.
 
 ### Chrome Extension
 
+- Connects to a native messaging host owned by the macOS app.
 - Opens Mini windows with `chrome.windows.create({ type: "popup", url })`.
 - Tracks Mini window IDs and tab IDs.
 - Promotes a Mini tab to the user's main Chrome window.
@@ -56,7 +58,7 @@ Slack, Messages, Mail, Notion, Linear, and other apps before Chrome does.
 ### Option 1: Native Messaging
 
 The macOS app installs a Chrome Native Messaging host. The extension connects to
-that host and receives incoming URLs.
+that host and receives incoming URLs without opening a visible bridge tab.
 
 Pros:
 
@@ -100,8 +102,8 @@ Cons:
 
 ## Initial Recommendation
 
-Prototype with a local bridge if speed matters. Move to Native Messaging before
-public release.
+Use native messaging as the bridge for the Chrome profile workflow. It avoids
+the visible bridge tab that can trigger focus and Space switching.
 
 ## Security Notes
 

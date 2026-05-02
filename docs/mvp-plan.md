@@ -6,7 +6,7 @@
 - [x] Define architecture.
 - [x] Create Chrome extension scaffold.
 - [ ] Choose final app name.
-- [ ] Choose prototype bridge: localhost or Native Messaging.
+- [x] Choose prototype bridge: Native Messaging.
 
 ## Phase 1: Chrome Extension Prototype
 

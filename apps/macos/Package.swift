@@ -8,12 +8,18 @@ let package = Package(
     ],
     products: [
         .executable(name: "PeekLink", targets: ["PeekLink"]),
+        .executable(name: "PeekLinkHost", targets: ["PeekLinkHost"]),
     ],
     targets: [
         .executableTarget(
             name: "PeekLink",
             dependencies: [],
             path: "Sources/PeekLink"
+        ),
+        .executableTarget(
+            name: "PeekLinkHost",
+            dependencies: [],
+            path: "Sources/PeekLinkHost"
         ),
     ]
 )

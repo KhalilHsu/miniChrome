@@ -1,4 +1,8 @@
 const urlParams = new URLSearchParams(window.location.search);
 const targetUrl = urlParams.get('url');
 
-chrome.runtime.sendMessage({ action: "openMiniWindow", url: targetUrl });
+chrome.runtime.sendMessage({
+  action: "openMiniWindow",
+  url: targetUrl,
+  source: "bridge"
+});

@@ -2,7 +2,6 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("chromeExtensionId") private var chromeExtensionId: String = ""
-    @AppStorage("chromeAppName") private var chromeAppName: String = "Google Chrome"
 
     private var isExtensionIdValid: Bool {
         let id = chromeExtensionId.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -18,7 +17,7 @@ struct SettingsView: View {
                     .onChange(of: chromeExtensionId) { newValue in
                         let id = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                         if id.count == 32 && id.allSatisfy({ $0.isLetter || $0.isNumber }) {
-                            NotificationCenter.default.post(name: Notification.Name("FlushPendingURLs"), object: nil)
+                            NotificationCenter.default.post(name: Notification.Name("RefreshNativeMessagingManifest"), object: nil)
                         }
                     }
 
@@ -32,17 +31,13 @@ struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
 
-                TextField("Chrome App / Path", text: $chromeAppName)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .frame(width: 300)
-                    .padding(.top, 10)
-
-                Text("E.g., 'Google Chrome', 'Google Chrome Canary', or absolute path.")
+                Text("This ID is used to install the native messaging bridge for your unpacked Chrome extension.")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .padding(.top, 10)
             }
         }
         .padding(20)
-        .frame(width: 400, height: 250)
+        .frame(width: 420, height: 220)
     }
 }

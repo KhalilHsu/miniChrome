@@ -23,3 +23,12 @@ Decision: Do not read or decrypt Chrome profile databases.
 Reason: It is fragile, invasive, and unnecessary. Opening pages inside real
 Chrome gives us the desired login behavior without touching sensitive profile
 storage.
+
+## 2026-05-01: Use Native Messaging For The Bridge
+
+Decision: Use a Chrome native messaging host instead of a visible bridge tab to
+hand URLs from the macOS app to the Chrome extension.
+
+Reason: The visible bridge tab can activate Chrome and trigger Space switching.
+Native messaging keeps the URL transfer out of the UI path while preserving the
+real Chrome profile workflow.
