@@ -55,10 +55,7 @@ function connectNativeBridge() {
 
 function handleNativeMessage(message) {
   if (message && message.action === "openMiniWindow" && message.url) {
-    openMiniWindow(message.url, {
-      focused: false,
-      raiseAfterCreate: true
-    });
+    openMiniWindow(message.url);
   }
 }
 
@@ -107,10 +104,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "openMiniWindow") {
     if (message.url) {
-      openMiniWindow(message.url, {
-        focused: message.source !== "bridge",
-        raiseAfterCreate: message.source === "bridge"
-      });
+      openMiniWindow(message.url);
     }
     if (sender.tab && sender.tab.id) {
       chrome.tabs.remove(sender.tab.id).catch((e) => {
@@ -196,7 +190,7 @@ async function isMiniWindow(windowId, tab) {
   return false;
 }
 
-async function openMiniWindow(url, options = {}) {
+async function openMiniWindow(url) {
   const displays = await chrome.system.display.getInfo();
   const display = displays.find(d => d.isPrimary) || displays[0];
 
@@ -212,7 +206,7 @@ async function openMiniWindow(url, options = {}) {
   const window = await chrome.windows.create({
     url,
     type: "popup",
-    focused: options.focused ?? true,
+    focused: true,
     width,
     height,
     left,
@@ -225,17 +219,6 @@ async function openMiniWindow(url, options = {}) {
     const sessionIds = await getSessionWindowIds();
     await setSessionWindowIds([...new Set([...sessionIds, window.id])]);
     logInfo("Opened mini window:", window.id, "url:", url);
-
-    if (options.raiseAfterCreate) {
-      setTimeout(async () => {
-        try {
-          await chrome.windows.update(window.id, { focused: true });
-          logInfo("Raised mini window after create:", window.id);
-        } catch (e) {
-          logWarn("Failed to raise mini window after create:", e.message, { windowId: window.id });
-        }
-      }, 150);
-    }
   }
 }
 
