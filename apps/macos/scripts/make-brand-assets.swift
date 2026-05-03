@@ -11,6 +11,7 @@ enum AssetKind {
 let fm = FileManager.default
 let cwd = URL(fileURLWithPath: fm.currentDirectoryPath)
 let outputRoot = cwd.appendingPathComponent(".build/brand-assets", isDirectory: true)
+let appIconSource = cwd.appendingPathComponent("../../logo.png").standardizedFileURL
 let extensionIconRoot = cwd.appendingPathComponent("../../extension/chrome/icons", isDirectory: true).standardizedFileURL
 
 try fm.createDirectory(at: outputRoot, withIntermediateDirectories: true)
@@ -41,15 +42,19 @@ func renderAsset(kind: AssetKind, outputName: String, outputRoot: URL, sizes: [I
     }
     try fm.createDirectory(at: iconsetURL, withIntermediateDirectories: true)
 
+    let sourceImage = kind == .app ? try loadAppIconSource() : nil
+
     for size in sizes {
         let baseName = "icon_\(size)x\(size)"
-        let image = try pngData(from: renderIcon(kind: kind, size: CGFloat(size)))
+        let image = try pngData(from: renderIcon(kind: kind, size: CGFloat(size), sourceImage: sourceImage))
         try image.write(to: iconsetURL.appendingPathComponent("\(baseName).png"))
 
         let retinaSize = size * 2
-        let retinaPNG = try pngData(from: renderIcon(kind: kind, size: CGFloat(retinaSize)))
+        let retinaPNG = try pngData(from: renderIcon(kind: kind, size: CGFloat(retinaSize), sourceImage: sourceImage))
         try retinaPNG.write(to: iconsetURL.appendingPathComponent("\(baseName)@2x.png"))
     }
+
+    try writeICNS(from: iconsetURL, to: outputRoot.appendingPathComponent("\(outputName).icns"))
 }
 
 func renderExtensionIcons(outputRoot: URL) throws {
@@ -58,20 +63,41 @@ func renderExtensionIcons(outputRoot: URL) throws {
     }
     try fm.createDirectory(at: outputRoot, withIntermediateDirectories: true)
 
+    let sourceImage = try loadAppIconSource()
     for size in [16, 32, 48, 128] {
-        let png = try pngData(from: renderIcon(kind: .app, size: CGFloat(size)))
+        let png = try pngData(from: renderIcon(kind: .app, size: CGFloat(size), sourceImage: sourceImage))
         try png.write(to: outputRoot.appendingPathComponent("icon_\(size).png"))
     }
 }
 
-func renderIcon(kind: AssetKind, size: CGFloat) -> NSImage {
-    let image = NSImage(size: NSSize(width: size, height: size))
-    image.lockFocus()
-    defer { image.unlockFocus() }
-
-    guard let context = NSGraphicsContext.current?.cgContext else {
-        return image
+func renderIcon(kind: AssetKind, size: CGFloat, sourceImage: NSImage? = nil) -> NSImage {
+    let pixelSize = Int(size)
+    guard let bitmap = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: pixelSize,
+        pixelsHigh: pixelSize,
+        bitsPerSample: 8,
+        samplesPerPixel: 4,
+        hasAlpha: true,
+        isPlanar: false,
+        colorSpaceName: .deviceRGB,
+        bitmapFormat: [],
+        bytesPerRow: 0,
+        bitsPerPixel: 0
+    ) else {
+        return NSImage(size: NSSize(width: size, height: size))
     }
+    bitmap.size = NSSize(width: size, height: size)
+
+    guard let graphics = NSGraphicsContext(bitmapImageRep: bitmap) else {
+        return NSImage(size: NSSize(width: size, height: size))
+    }
+
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.current = graphics
+    defer { NSGraphicsContext.restoreGraphicsState() }
+
+    let context = graphics.cgContext
 
     context.setShouldAntialias(true)
     context.interpolationQuality = .high
@@ -79,8 +105,12 @@ func renderIcon(kind: AssetKind, size: CGFloat) -> NSImage {
     let canvas = CGRect(origin: .zero, size: CGSize(width: size, height: size))
 
     if kind == .app {
-        drawBackground(in: context, rect: canvas.insetBy(dx: size * 0.06, dy: size * 0.06), kind: kind)
-        drawAppSymbol(in: context, rect: canvas.insetBy(dx: size * 0.10, dy: size * 0.10))
+        if let sourceImage {
+            drawSourceImage(sourceImage, in: canvas)
+        } else {
+            drawBackground(in: context, rect: canvas.insetBy(dx: size * 0.06, dy: size * 0.06), kind: kind)
+            drawAppSymbol(in: context, rect: canvas.insetBy(dx: size * 0.10, dy: size * 0.10))
+        }
     } else if kind == .menuBar {
         drawMenuBarIcon(in: context, size: size)
     } else {
@@ -94,7 +124,42 @@ func renderIcon(kind: AssetKind, size: CGFloat) -> NSImage {
                           extensionMode: true)
     }
 
+    let image = NSImage(size: NSSize(width: size, height: size))
+    image.addRepresentation(bitmap)
     return image
+}
+
+func loadAppIconSource() throws -> NSImage {
+    guard fm.fileExists(atPath: appIconSource.path),
+          let image = NSImage(contentsOf: appIconSource) else {
+        throw NSError(
+            domain: "BrandAssets",
+            code: 2,
+            userInfo: [NSLocalizedDescriptionKey: "Failed to load app icon source at \(appIconSource.path)"]
+        )
+    }
+    return image
+}
+
+func drawSourceImage(_ sourceImage: NSImage, in canvas: CGRect) {
+    let imageSize = sourceImage.size
+    guard imageSize.width > 0, imageSize.height > 0 else { return }
+
+    let scale = min(canvas.width / imageSize.width, canvas.height / imageSize.height)
+    let drawSize = CGSize(width: imageSize.width * scale, height: imageSize.height * scale)
+    let drawRect = CGRect(
+        x: canvas.midX - drawSize.width / 2,
+        y: canvas.midY - drawSize.height / 2,
+        width: drawSize.width,
+        height: drawSize.height
+    )
+
+    sourceImage.draw(in: drawRect,
+                     from: CGRect(origin: .zero, size: imageSize),
+                     operation: .sourceOver,
+                     fraction: 1.0,
+                     respectFlipped: true,
+                     hints: [.interpolation: NSImageInterpolation.high])
 }
 
 func drawAppSymbol(in context: CGContext, rect: CGRect) {
@@ -311,10 +376,54 @@ func drawBrowserWindow(in context: CGContext,
 }
 
 func pngData(from image: NSImage) throws -> Data {
-    guard let tiff = image.tiffRepresentation,
-          let rep = NSBitmapImageRep(data: tiff),
+    guard let rep = image.representations.compactMap({ $0 as? NSBitmapImageRep }).first,
           let data = rep.representation(using: .png, properties: [:]) else {
         throw NSError(domain: "BrandAssets", code: 1, userInfo: [NSLocalizedDescriptionKey: "Failed to encode PNG"])
     }
     return data
+}
+
+func writeICNS(from iconsetURL: URL, to outputURL: URL) throws {
+    let entries: [(type: String, fileName: String)] = [
+        ("icp4", "icon_16x16.png"),
+        ("icp5", "icon_32x32.png"),
+        ("icp6", "icon_32x32@2x.png"),
+        ("ic07", "icon_128x128.png"),
+        ("ic08", "icon_256x256.png"),
+        ("ic09", "icon_512x512.png"),
+        ("ic10", "icon_512x512@2x.png")
+    ]
+
+    var chunks: [(type: String, data: Data)] = []
+    for entry in entries {
+        let url = iconsetURL.appendingPathComponent(entry.fileName)
+        chunks.append((entry.type, try Data(contentsOf: url)))
+    }
+
+    let fileLength = 8 + chunks.reduce(0) { $0 + 8 + $1.data.count }
+    var icns = Data()
+    appendFourCC("icns", to: &icns)
+    appendBigEndianUInt32(UInt32(fileLength), to: &icns)
+
+    for chunk in chunks {
+        appendFourCC(chunk.type, to: &icns)
+        appendBigEndianUInt32(UInt32(8 + chunk.data.count), to: &icns)
+        icns.append(chunk.data)
+    }
+
+    try icns.write(to: outputURL)
+}
+
+func appendFourCC(_ value: String, to data: inout Data) {
+    data.append(contentsOf: value.utf8)
+}
+
+func appendBigEndianUInt32(_ value: UInt32, to data: inout Data) {
+    let bytes = [
+        UInt8((value >> 24) & 0xff),
+        UInt8((value >> 16) & 0xff),
+        UInt8((value >> 8) & 0xff),
+        UInt8(value & 0xff)
+    ]
+    data.append(contentsOf: bytes)
 }

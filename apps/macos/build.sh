@@ -17,10 +17,6 @@ swift build -c release
 echo "Generating brand assets..."
 swift scripts/make-brand-assets.swift
 
-echo "Creating app icon..."
-iconutil -c icns "${ASSET_DIR}/AppIcon.iconset" -o "${ASSET_DIR}/AppIcon.icns"
-iconutil -c icns "${ASSET_DIR}/MenuBarIcon.iconset" -o "${ASSET_DIR}/MenuBarIcon.icns"
-
 echo "Creating App Bundle..."
 rm -rf "${APP_BUNDLE}"
 mkdir -p "${APP_BUNDLE}/Contents/MacOS"

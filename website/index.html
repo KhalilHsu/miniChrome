@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PeekLink · The Little Arc for Chrome</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sunset-start: #ff7e5f;
+            --sunset-end: #feb47b;
+            --ink-primary: #1a1a1f;
+            --ink-secondary: #54545a;
+            --ink-muted: #8c8c93;
+            --arc-coral: #ff5f5f;
+            --bg-page: #f2f3f5;
+            --bg-email: #f9f9fb;
+            --border: rgba(0,0,0,0.04);
+            --grid-bg: #f2f2f2;
+            --shadow-email: 0 50px 100px -20px rgba(50, 50, 93, 0.15), 0 30px 60px -30px rgba(0, 0, 0, 0.2);
+        }
+
+        [data-theme="dark"] {
+            --bg-page: #050505;
+            --bg-email: #111111;
+            --ink-primary: #fafafa;
+            --ink-secondary: #c2c2c9;
+            --ink-muted: #666666;
+            --border: rgba(255,255,255,0.08);
+            --grid-bg: #1a1a1a;
+            --shadow-email: 0 50px 100px -20px rgba(0, 0, 0, 0.5), 0 30px 60px -30px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1), color 0.4s, border-color 0.4s;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            padding: 80px 20px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--ink-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .preheader {
+            width: 788px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--ink-muted);
+        }
+
+        .email-container {
+            width: 788px;
+            background: var(--bg-email);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow-email);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .masthead {
+            padding: 32px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .wordmark {
+            font-weight: 800;
+            font-size: 19px;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--ink-secondary);
+        }
+
+        .nav-links a, .nav-links button {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font: inherit;
+            text-transform: uppercase;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+
+        .nav-links button:hover {
+            background: rgba(0,0,0,0.03);
+        }
+        [data-theme="dark"] .nav-links button:hover { background: rgba(255,255,255,0.05); }
+
+        #lang-toggle { min-width: 55px; }
+        #theme-toggle { min-width: 90px; }
+
+        .hero-block {
+            width: 100%;
+            height: 480px;
+            background: linear-gradient(135deg, var(--sunset-start), var(--sunset-end));
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero-stamp {
+            position: absolute;
+            top: 32px;
+            left: 48px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: 700;
+            color: white;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .hero-tag {
+            position: absolute;
+            bottom: 32px;
+            left: 48px;
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            letter-spacing: 0.12em;
+        }
+
+        .mock-window {
+            width: 380px; 
+            height: 250px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 40px 80px rgba(0,0,0,0.18); 
+            border: 1px solid rgba(0,0,0,0.05); 
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
+            transform: scale(1.05);
+        }
+        [data-theme="dark"] .mock-window { background: #1a1a1a; border-color: rgba(255,255,255,0.1); }
+
+        .title-bar {
+            height: 28px; 
+            background: rgba(0,0,0,0.03); 
+            border-bottom: 1px solid rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            padding: 0 10px; 
+            gap: 6px;
+        }
+
+        .content-body {
+            padding: 80px 80px;
+            text-align: center;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: var(--arc-coral);
+            margin-bottom: 32px;
+            text-transform: uppercase;
+        }
+
+        .headline-lockup {
+            font-weight: 800;
+            font-size: 52px;
+            line-height: 0.95;
+            letter-spacing: -0.05em;
+            margin-bottom: 48px;
+            text-transform: uppercase;
+        }
+
+        .skew-accent {
+            display: inline-block;
+            transform: skew(-10deg);
+            background: var(--ink-primary);
+            color: var(--bg-email);
+            padding: 2px 14px;
+            margin-top: 8px;
+        }
+
+        .body-paragraph {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--ink-secondary);
+            margin-bottom: 56px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            background: var(--ink-primary);
+            color: var(--bg-email);
+            padding: 18px 56px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 80px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--grid-bg);
+            border: 1px solid var(--grid-bg);
+        }
+
+        .spec-item {
+            background: var(--bg-email);
+            padding: 56px 32px;
+        }
+
+        .spec-number {
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 8px;
+        }
+
+        .spec-unit {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--ink-muted);
+        }
+
+        .spec-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--ink-secondary);
+            margin-top: 12px;
+        }
+
+        .footer {
+            padding: 64px 48px;
+            text-align: center;
+            background: var(--bg-email);
+            border-top: 1px solid var(--border);
+            color: var(--ink-muted);
+            font-size: 12px;
+            letter-spacing: 0.02em;
+        }
+
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--ink-secondary);
+            opacity: 0.8;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="preheader">
+        <span id="preheader-left">Product Launch Edition · 2026</span>
+        <span id="preheader-right">View in Browser</span>
+    </div>
+
+    <div class="email-container">
+        <div class="masthead">
+            <a href="#" class="wordmark">
+                <img src="logo.png" alt="PeekLink Logo" class="logo-img">
+                PeekLink
+            </a>
+            <div class="nav-links">
+                <button id="lang-toggle">EN / 中</button>
+                <button id="theme-toggle">DARK / LIGHT</button>
+                <a href="https://github.com/khalilhsu/miniChrome">GITHUB</a>
+            </div>
+        </div>
+
+        <div class="hero-block">
+            <div class="hero-stamp" id="badge">MACOS NATIVE</div>
+            <div class="mock-window">
+                <div style="height: 28px; background: rgba(0,0,0,0.03); border-bottom: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; padding: 0 10px; gap: 6px;">
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #ff5f5f;"></div>
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #feb47b;"></div>
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #48bb78;"></div>
+                </div>
+                <div style="flex: 1; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
+                    <div style="height: 14px; width: 45%; background: rgba(0,0,0,0.04); border-radius: 3px;"></div>
+                    <div style="height: 100px; width: 100%; background: rgba(0,0,0,0.02); border-radius: 8px;"></div>
+                </div>
+            </div>
+            <div class="hero-tag">EDITION · SUNSET ARC</div>
+        </div>
+
+        <div class="content-body">
+            <div class="eyebrow" id="eyebrow">CHROME ENGINE · ZERO SLOP · ONE CLICK</div>
+            <div class="headline-lockup">
+                <span id="h1">EXTERNAL LINKS.</span><br>
+                <span id="h2">FILTERED.</span><br>
+                <span class="skew-accent" id="h3">PROMOTED.</span>
+            </div>
+            <p class="body-paragraph" id="subhead">
+                PeekLink is the missing "Little Arc" for Chrome. It captures links from Slack, Messages, and Linear into lightweight Mini Chrome windows—keeping your main workspace clean until you decide it's worth keeping.
+            </p>
+            <a href="https://github.com/khalilhsu/miniChrome" class="cta-btn" id="cta">Download for macOS</a>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <div class="spec-number">100<span class="spec-unit">%</span></div>
+                    <div class="spec-label" id="s1">CHROME PROFILE SHARED</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-number">1<span class="spec-unit">ms</span></div>
+                    <div class="spec-label" id="s2">INSTANT PROMOTION</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-number">0</div>
+                    <div class="spec-label" id="s3">WORKSPACE POLLUTION</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-number">80<span class="spec-unit">%</span></div>
+                    <div class="spec-label" id="s4">SCREEN SIZE SMART SCALE</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <a href="#" class="footer-logo">
+                <img src="logo.png" alt="PeekLink Logo" class="logo-img" style="width:16px; height:16px; border-radius:3px;">
+                PeekLink
+            </a>
+            <p id="footer-text">Built locally on your Mac. Shared Profile Privacy.</p>
+        </div>
+    </div>
+
+<script>
+    const translations = {
+        en: {
+            badge: "MACOS NATIVE",
+            eyebrow: "CHROME ENGINE · ZERO SLOP · ONE CLICK",
+            h1: "EXTERNAL LINKS.",
+            h2: "FILTERED.",
+            h3: "PROMOTED.",
+            subhead: "PeekLink is the missing \"Little Arc\" for Chrome. It captures links from Slack, Messages, and Linear into lightweight Mini Chrome windows—keeping your main workspace clean until you decide it's worth keeping.",
+            cta: "Download for macOS",
+            s1: "CHROME PROFILE SHARED",
+            s2: "INSTANT PROMOTION",
+            s3: "WORKSPACE POLLUTION",
+            s4: "SCREEN SIZE SMART SCALE",
+            footer: "Built locally on your Mac. Shared Profile Privacy.",
+            themeTextDark: "DARK / LIGHT",
+            themeTextLight: "LIGHT / DARK",
+            viewInBrowser: "View in Browser",
+            preheader: "Product Launch Edition · 2026"
+        },
+        cn: {
+            badge: "MACOS 原生应用",
+            eyebrow: "CHROME 内核 · 零杂乱 · 一键提升",
+            h1: "外部链接。",
+            h2: "过滤。",
+            h3: "提升。",
+            subhead: "PeekLink 是 Chrome 缺失的 \"Little Arc\" 体验。它将来自 Slack、微信或邮件的链接捕获到轻量级迷你窗口中，直到您决定将其保留至主工作区。",
+            cta: "下载 macOS 版",
+            s1: "共享配置文件",
+            s2: "瞬时窗口提升",
+            s3: "工作区零污染",
+            s4: "智能屏幕缩放",
+            footer: "在您的 Mac 本地运行。共享配置文件，保护隐私。",
+            themeTextDark: "深色 / 浅色",
+            themeTextLight: "浅色 / 深色",
+            viewInBrowser: "在浏览器中查看",
+            preheader: "产品发布限定版 · 2026"
+        }
+    };
+
+    let currentLang = 'en';
+    let currentTheme = 'light';
+
+    const langBtn = document.getElementById('lang-toggle');
+    const themeBtn = document.getElementById('theme-toggle');
+
+    function updateLanguage() {
+        const t = translations[currentLang];
+        document.getElementById('badge').textContent = t.badge;
+        document.getElementById('eyebrow').textContent = t.eyebrow;
+        document.getElementById('h1').textContent = t.h1;
+        document.getElementById('h2').textContent = t.h2;
+        document.getElementById('h3').textContent = t.h3;
+        document.getElementById('subhead').textContent = t.subhead;
+        document.getElementById('cta').textContent = t.cta;
+        document.getElementById('s1').textContent = t.s1;
+        document.getElementById('s2').textContent = t.s2;
+        document.getElementById('s3').textContent = t.s3;
+        document.getElementById('s4').textContent = t.s4;
+        document.getElementById('footer-text').textContent = t.footer;
+        document.getElementById('preheader-left').textContent = t.preheader;
+        document.getElementById('preheader-right').textContent = t.viewInBrowser;
+        
+        themeBtn.textContent = currentTheme === 'light' ? t.themeTextDark : t.themeTextLight;
+    }
+
+    langBtn.addEventListener('click', () => {
+        currentLang = currentLang === 'en' ? 'cn' : 'en';
+        updateLanguage();
+    });
+
+    themeBtn.addEventListener('click', () => {
+        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', currentTheme);
+        updateLanguage();
+    });
+</script>
+
+</body>
+</html>
