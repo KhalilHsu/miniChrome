@@ -72,9 +72,7 @@ struct SettingsView: View {
                     title: "Open Chrome Extensions",
                     detail: "Turn on Developer mode in the top-right corner.",
                     primaryTitle: "Open Extensions",
-                    primaryAction: Self.openChromeExtensions,
-                    secondaryTitle: nil,
-                    secondaryAction: nil
+                    primaryAction: Self.openChromeExtensions
                 )
 
                 SetupStepRow(
@@ -82,9 +80,7 @@ struct SettingsView: View {
                     title: "Load the PeekLink extension folder",
                     detail: extensionInstallDetail,
                     primaryTitle: "Reveal Folder",
-                    primaryAction: revealExtensionFolder,
-                    secondaryTitle: "Copy Path",
-                    secondaryAction: copyExtensionFolderPath
+                    primaryAction: revealExtensionFolder
                 )
 
                 SetupStepRow(
@@ -92,9 +88,7 @@ struct SettingsView: View {
                     title: "Copy the extension ID",
                     detail: "After Chrome loads PeekLink Companion, copy the 32-letter ID shown on that extension card.",
                     primaryTitle: nil,
-                    primaryAction: nil,
-                    secondaryTitle: nil,
-                    secondaryAction: nil
+                    primaryAction: nil
                 )
 
                 Text("Paste Extension ID")
@@ -173,7 +167,7 @@ struct SettingsView: View {
             return "Click Load unpacked in Chrome, then select the PeekLink ChromeExtension folder."
         }
 
-        return "Click Load unpacked in Chrome, then select this folder: \(extensionSourcePath)"
+        return "Click Reveal Folder, then in Chrome click Load unpacked and choose the revealed ChromeExtension folder."
     }
 
     private func normalizeAndInstallExtensionId(_ newValue: String) {
@@ -212,12 +206,6 @@ struct SettingsView: View {
     private func revealExtensionFolder() {
         guard !extensionSourcePath.isEmpty else { return }
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: extensionSourcePath)])
-    }
-
-    private func copyExtensionFolderPath() {
-        guard !extensionSourcePath.isEmpty else { return }
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(extensionSourcePath, forType: .string)
     }
 
     private func copyManifestPath() {
@@ -324,8 +312,6 @@ private struct SetupStepRow: View {
     let detail: String
     let primaryTitle: String?
     let primaryAction: (() -> Void)?
-    let secondaryTitle: String?
-    let secondaryAction: (() -> Void)?
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -346,16 +332,9 @@ private struct SetupStepRow: View {
 
             Spacer(minLength: 12)
 
-            HStack(spacing: 6) {
-                if let secondaryTitle, let secondaryAction {
-                    Button(secondaryTitle, action: secondaryAction)
-                        .controlSize(.small)
-                }
-
-                if let primaryTitle, let primaryAction {
-                    Button(primaryTitle, action: primaryAction)
-                        .controlSize(.small)
-                }
+            if let primaryTitle, let primaryAction {
+                Button(primaryTitle, action: primaryAction)
+                    .controlSize(.small)
             }
         }
     }
