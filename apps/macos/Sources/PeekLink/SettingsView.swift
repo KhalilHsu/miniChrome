@@ -3,6 +3,7 @@ import AppKit
 
 struct SettingsView: View {
     @AppStorage("chromeExtensionId") private var chromeExtensionId: String = ""
+    @AppStorage("extensionSourcePath") private var extensionSourcePath: String = ""
     @AppStorage("lastDeliveryStatus") private var lastDeliveryStatus: String = "No links delivered yet."
     @AppStorage("lastDeliveryURL") private var lastDeliveryURL: String = ""
     @AppStorage("lastDeliveryDate") private var lastDeliveryDate: String = ""
@@ -38,31 +39,7 @@ struct SettingsView: View {
                     .foregroundColor(.secondary)
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                SetupChecklistRow(
-                    title: "Chrome extension loaded",
-                    detail: "Load the local extension/chrome folder in Chrome.",
-                    isComplete: hasExtensionId,
-                    actionTitle: "Open Extensions",
-                    action: Self.openChromeExtensions
-                )
-
-                SetupChecklistRow(
-                    title: "Extension ID configured",
-                    detail: extensionIdStatusText,
-                    isComplete: isExtensionIdValid,
-                    actionTitle: nil,
-                    action: nil
-                )
-
-                SetupChecklistRow(
-                    title: "Native bridge ready",
-                    detail: bridgeStatusText,
-                    isComplete: isBridgeReady,
-                    actionTitle: "Refresh",
-                    action: refreshBridge
-                )
-
+            SettingsBlock(title: "Link Opening") {
                 SetupChecklistRow(
                     title: "PeekLink is default browser",
                     detail: defaultBrowserStatusText,
@@ -70,13 +47,32 @@ struct SettingsView: View {
                     actionTitle: "Open Settings",
                     action: Self.openDefaultBrowserSettings
                 )
+
+                SetupChecklistRow(
+                    title: "Test link opens through PeekLink",
+                    detail: "Send a test URL through the same queue used by external links.",
+                    isComplete: lastDeliveryStatus.hasPrefix("Queued"),
+                    actionTitle: "Open Test Link",
+                    action: openTestLink
+                )
+
+                DeliveryStatusView(
+                    status: lastDeliveryStatus,
+                    url: lastDeliveryURL,
+                    date: lastDeliveryDate
+                )
             }
 
             Divider()
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Chrome Extension ID")
-                    .font(.headline)
+            SettingsBlock(title: "Chrome Connection") {
+                SetupChecklistRow(
+                    title: "Chrome extension loaded",
+                    detail: "Load the local PeekLink extension folder in Chrome.",
+                    isComplete: hasExtensionId,
+                    actionTitle: "Open Extensions",
+                    action: Self.openChromeExtensions
+                )
 
                 TextField("Paste the 32-character ID from chrome://extensions", text: $chromeExtensionId)
                     .textFieldStyle(.roundedBorder)
@@ -88,48 +84,36 @@ struct SettingsView: View {
                 Text(extensionIdHelpText)
                     .font(.caption)
                     .foregroundColor(isExtensionIdValid || !hasExtensionId ? .secondary : .red)
+
+                SetupChecklistRow(
+                    title: "Native bridge ready",
+                    detail: bridgeStatusText,
+                    isComplete: isBridgeReady,
+                    actionTitle: "Refresh",
+                    action: refreshBridge
+                )
             }
 
             Divider()
 
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Test")
-                            .font(.headline)
-                        Text("Send a test URL through the same queue used by external links.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Button("Open Test Link") {
-                        NotificationCenter.default.post(name: Notification.Name("OpenTestLink"), object: nil)
-                        refreshSetupState()
-                    }
+            SettingsBlock(title: "Advanced") {
+                HStack(spacing: 8) {
+                    Button("Reveal Extension Folder", action: revealExtensionFolder)
+                        .disabled(extensionSourcePath.isEmpty)
+                    Button("Copy Manifest Path", action: copyManifestPath)
                 }
 
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(lastDeliveryStatus)
-                        .font(.caption.weight(.medium))
-                    if !lastDeliveryDate.isEmpty {
-                        Text("\(lastDeliveryDate) - \(lastDeliveryURL)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                    }
-                }
-                .padding(10)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8))
+                Text(advancedStatusText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .truncationMode(.middle)
             }
 
             Spacer(minLength: 0)
         }
         .padding(22)
-        .frame(width: 560, height: 610)
+        .frame(width: 590, height: 650)
         .onAppear(perform: refreshSetupState)
     }
 
@@ -188,6 +172,26 @@ struct SettingsView: View {
         refreshSetupState()
     }
 
+    private func openTestLink() {
+        NotificationCenter.default.post(name: Notification.Name("OpenTestLink"), object: nil)
+        refreshSetupState()
+    }
+
+    private var advancedStatusText: String {
+        let extensionPath = extensionSourcePath.isEmpty ? "Extension folder path was not saved by install.sh." : extensionSourcePath
+        return "Extension folder: \(extensionPath)\nNative manifest: \(NativeMessagingManifest.manifestPath())"
+    }
+
+    private func revealExtensionFolder() {
+        guard !extensionSourcePath.isEmpty else { return }
+        NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: extensionSourcePath)])
+    }
+
+    private func copyManifestPath() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(NativeMessagingManifest.manifestPath(), forType: .string)
+    }
+
     private func refreshSetupState() {
         refreshToken = UUID()
     }
@@ -236,6 +240,19 @@ struct SettingsView: View {
     }
 }
 
+private struct SettingsBlock<Content: View>: View {
+    let title: String
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title)
+                .font(.headline)
+            content
+        }
+    }
+}
+
 private struct SetupChecklistRow: View {
     let title: String
     let detail: String
@@ -265,5 +282,28 @@ private struct SetupChecklistRow: View {
                     .controlSize(.small)
             }
         }
+    }
+}
+
+private struct DeliveryStatusView: View {
+    let status: String
+    let url: String
+    let date: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(status)
+                .font(.caption.weight(.medium))
+            if !date.isEmpty {
+                Text("\(date) - \(url)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8))
     }
 }
