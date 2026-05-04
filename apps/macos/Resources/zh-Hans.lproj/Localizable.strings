@@ -17,9 +17,6 @@
 
 "Setup" = "设置向导";
 "Finish these once, then external links can open in Mini Chrome." = "完成这些步骤后，外部链接就可以先用 Mini Chrome 打开。";
-"Language" = "语言";
-"App Language" = "App 语言";
-"Follow System" = "跟随系统";
 "Link Opening" = "链接打开";
 "PeekLink is default browser" = "PeekLink 是默认浏览器";
 "External http and https links route through PeekLink." = "外部 http 和 https 链接会经过 PeekLink。";

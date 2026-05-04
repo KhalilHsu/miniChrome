@@ -4,7 +4,7 @@ enum L10n {
     private static let languageKey = "appLanguage"
 
     static func tr(_ key: String) -> String {
-        let language = UserDefaults.standard.string(forKey: languageKey) ?? "system"
+        let language = UserDefaults.standard.string(forKey: languageKey) ?? "zh-Hans"
         return tr(key, language: language)
     }
 
@@ -13,8 +13,8 @@ enum L10n {
             return key
         }
 
-        guard language != "system",
-              let path = Bundle.main.path(forResource: language, ofType: "lproj"),
+        let resolvedLanguage = language == "system" ? "zh-Hans" : language
+        guard let path = Bundle.main.path(forResource: resolvedLanguage, ofType: "lproj"),
               let bundle = Bundle(path: path) else {
             return NSLocalizedString(key, comment: "")
         }

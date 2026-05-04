@@ -7,7 +7,7 @@ struct SettingsView: View {
     @AppStorage("lastDeliveryStatus") private var lastDeliveryStatus: String = L10n.tr("No links delivered yet.")
     @AppStorage("lastDeliveryURL") private var lastDeliveryURL: String = ""
     @AppStorage("lastDeliveryDate") private var lastDeliveryDate: String = ""
-    @AppStorage("appLanguage") private var appLanguage: String = "system"
+    @AppStorage("appLanguage") private var appLanguage: String = "zh-Hans"
     @State private var refreshToken = UUID()
 
     private var trimmedExtensionId: String {
@@ -43,13 +43,17 @@ struct SettingsView: View {
 
                 Spacer()
 
-                Picker(t("App Language"), selection: $appLanguage) {
-                    Text(t("Follow System")).tag("system")
+                Picker("", selection: $appLanguage) {
                     Text("English").tag("en")
                     Text("简体中文").tag("zh-Hans")
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 300)
+                .frame(width: 240)
+                .onAppear {
+                    if appLanguage == "system" {
+                        appLanguage = "zh-Hans"
+                    }
+                }
             }
 
             SettingsBlock(title: t("Link Opening")) {

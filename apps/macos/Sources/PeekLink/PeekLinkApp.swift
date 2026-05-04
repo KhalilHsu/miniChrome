@@ -5,7 +5,7 @@ import AppKit
 struct PeekLinkApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.openWindow) var openWindow
-    @AppStorage("appLanguage") private var appLanguage: String = "system"
+    @AppStorage("appLanguage") private var appLanguage: String = "zh-Hans"
 
     init() {
         NSApplication.shared.applicationIconImage = BrandAssets.appIcon()
