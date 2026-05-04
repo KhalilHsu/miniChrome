@@ -70,3 +70,8 @@ Because PeekLink relies on a Chrome Extension to provide a native-feeling "Littl
 - **`webNavigation`**: Used exclusively to catch JavaScript-based popups (e.g., `window.open`) that originate from a Mini window. It forces them to navigate inside the current Mini window instead of mistakenly spawning a new tab in your main Chrome window.
 - **`system.display`**: Used to intelligently calculate 80% of your current active monitor's dimensions and center the Mini window perfectly upon creation. This prevents websites from rendering in cramped "mobile" layouts.
 - **`tabs` & `windows`**: Required to create the Mini window, move tabs from the Mini window to your main Chrome window during a "Promote" action, and instantly close leftover tabs.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
