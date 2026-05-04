@@ -32,16 +32,12 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(t("Setup"))
-                        .font(.title3.weight(.semibold))
+            VStack(alignment: .leading, spacing: 10) {
+                Text(t("Setup"))
+                    .font(.title3.weight(.semibold))
 
-                    Text(t("Finish these once, then external links can open in Mini Chrome."))
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
+                Text(t("Finish these once, then external links can open in Mini Chrome."))
+                    .foregroundColor(.secondary)
 
                 Picker("", selection: $appLanguage) {
                     Text("English").tag("en")
@@ -143,7 +139,7 @@ struct SettingsView: View {
             Spacer(minLength: 0)
         }
         .padding(22)
-        .frame(width: 760, height: 720)
+        .frame(width: 620, height: 720)
         .id(appLanguage)
         .onAppear(perform: refreshSetupState)
         .onChange(of: appLanguage) { _ in
