@@ -4,6 +4,9 @@ import os.log
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     @AppStorage("chromeExtensionId") private var chromeExtensionId: String = ""
+    @AppStorage("lastDeliveryStatus") private var lastDeliveryStatus: String = "No links delivered yet."
+    @AppStorage("lastDeliveryURL") private var lastDeliveryURL: String = ""
+    @AppStorage("lastDeliveryDate") private var lastDeliveryDate: String = ""
 
     private let logger = Logger(subsystem: "com.peeklink.app", category: "URLHandler")
 
@@ -24,6 +27,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             object: nil
         )
 
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(openTestLink),
+            name: Notification.Name("OpenTestLink"),
+            object: nil
+        )
+
         refreshNativeMessagingManifest()
     }
 
@@ -36,16 +46,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let extId = chromeExtensionId.trimmingCharacters(in: .whitespacesAndNewlines)
         if extId.isEmpty || !isValidExtensionId(extId) {
             logger.warning("Native messaging bridge not configured, URL queued: \(urlString)")
+            recordDeliveryStatus("Queued, but Chrome bridge is not configured.", url: urlString)
             showBridgeMissingAlert()
         }
 
         do {
             try BridgeQueue.append(urlString: urlString)
             logger.info("Queued URL for native bridge: \(urlString)")
+            if isValidExtensionId(extId) {
+                recordDeliveryStatus("Queued for Chrome native bridge.", url: urlString)
+            }
         } catch {
             logger.error("Failed to queue URL: \(error.localizedDescription)")
+            recordDeliveryStatus("Failed to queue URL: \(error.localizedDescription)", url: urlString)
             showQueueErrorAlert(error, url: urlString)
         }
+    }
+
+    @objc private func openTestLink() {
+        handleIncomingURL("https://example.com/?peeklink-test=1")
     }
 
     @objc private func refreshNativeMessagingManifest() {
@@ -63,6 +82,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func isValidExtensionId(_ id: String) -> Bool {
         return id.count == 32 && id.allSatisfy { $0.isLetter || $0.isNumber }
     }
+
+    private func recordDeliveryStatus(_ status: String, url: String) {
+        lastDeliveryStatus = status
+        lastDeliveryURL = url
+        lastDeliveryDate = Self.statusDateFormatter.string(from: Date())
+    }
+
+    private static let statusDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .medium
+        return formatter
+    }()
 
     private func showBridgeMissingAlert() {
         DispatchQueue.main.async {

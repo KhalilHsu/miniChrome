@@ -3,6 +3,9 @@ import AppKit
 
 struct SettingsView: View {
     @AppStorage("chromeExtensionId") private var chromeExtensionId: String = ""
+    @AppStorage("lastDeliveryStatus") private var lastDeliveryStatus: String = "No links delivered yet."
+    @AppStorage("lastDeliveryURL") private var lastDeliveryURL: String = ""
+    @AppStorage("lastDeliveryDate") private var lastDeliveryDate: String = ""
     @State private var refreshToken = UUID()
 
     private var trimmedExtensionId: String {
@@ -87,10 +90,46 @@ struct SettingsView: View {
                     .foregroundColor(isExtensionIdValid || !hasExtensionId ? .secondary : .red)
             }
 
+            Divider()
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Test")
+                            .font(.headline)
+                        Text("Send a test URL through the same queue used by external links.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button("Open Test Link") {
+                        NotificationCenter.default.post(name: Notification.Name("OpenTestLink"), object: nil)
+                        refreshSetupState()
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(lastDeliveryStatus)
+                        .font(.caption.weight(.medium))
+                    if !lastDeliveryDate.isEmpty {
+                        Text("\(lastDeliveryDate) - \(lastDeliveryURL)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+                .padding(10)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8))
+            }
+
             Spacer(minLength: 0)
         }
         .padding(22)
-        .frame(width: 560, height: 500)
+        .frame(width: 560, height: 610)
         .onAppear(perform: refreshSetupState)
     }
 
