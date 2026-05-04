@@ -9,6 +9,10 @@ enum L10n {
     }
 
     static func tr(_ key: String, language: String) -> String {
+        if language == "en" {
+            return key
+        }
+
         guard language != "system",
               let path = Bundle.main.path(forResource: language, ofType: "lproj"),
               let bundle = Bundle(path: path) else {

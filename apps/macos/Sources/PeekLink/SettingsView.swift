@@ -142,6 +142,9 @@ struct SettingsView: View {
         .frame(width: 760, height: 720)
         .id(appLanguage)
         .onAppear(perform: refreshSetupState)
+        .onChange(of: appLanguage) { _ in
+            NSApp.keyWindow?.title = t("Settings")
+        }
     }
 
     private func t(_ key: String) -> String {
