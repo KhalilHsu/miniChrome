@@ -7,6 +7,7 @@ LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/A/Framewo
 INSTALL_PATH="/Applications/PeekLink.app"
 PROJECT_ROOT=$(pwd)
 EXTENSION_PATH="$PROJECT_ROOT/extension/chrome"
+EXTENSION_INSTALL_PATH="$HOME/Library/Application Support/PeekLink/ChromeExtension"
 
 # Navigate to macos app directory
 cd apps/macos
@@ -28,7 +29,10 @@ echo "🔗 Registering installed app with macOS Launch Services..."
 "$LSREGISTER" -f "$INSTALL_PATH"
 
 echo "🧭 Saving local extension path for setup..."
-defaults write com.peeklink.app extensionSourcePath "$EXTENSION_PATH"
+mkdir -p "$(dirname "$EXTENSION_INSTALL_PATH")"
+rm -rf "$EXTENSION_INSTALL_PATH"
+cp -R "$EXTENSION_PATH" "$EXTENSION_INSTALL_PATH"
+defaults write com.peeklink.app extensionSourcePath "$EXTENSION_INSTALL_PATH"
 
 echo "🧹 Removing build artifact from repo..."
 rm -rf "$APP_PATH"
@@ -40,5 +44,7 @@ echo "✅ macOS App Installation Complete!"
 echo ""
 echo "Next Steps:"
 echo "1. Finish setup in PeekLink -> Settings."
-echo "2. Use the checklist there to load the Chrome extension, paste its ID, set the default browser, and test the bridge."
+echo "2. Use the checklist there to load the Chrome extension from:"
+echo "   $EXTENSION_INSTALL_PATH"
+echo "3. Paste its ID, set the default browser, and test the bridge."
 echo "🎉 You're all set!"
