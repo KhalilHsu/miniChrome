@@ -31,41 +31,41 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text(L10n.tr("Setup"))
-                    .font(.title3.weight(.semibold))
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(t("Setup"))
+                        .font(.title3.weight(.semibold))
 
-                Text(L10n.tr("Finish these once, then external links can open in Mini Chrome."))
-                    .foregroundColor(.secondary)
-            }
+                    Text(t("Finish these once, then external links can open in Mini Chrome."))
+                        .foregroundColor(.secondary)
+                }
 
-            SettingsBlock(title: L10n.tr("Language")) {
-                Picker(L10n.tr("App Language"), selection: $appLanguage) {
-                    Text(L10n.tr("Follow System")).tag("system")
+                Spacer()
+
+                Picker(t("App Language"), selection: $appLanguage) {
+                    Text(t("Follow System")).tag("system")
                     Text("English").tag("en")
                     Text("简体中文").tag("zh-Hans")
                 }
                 .pickerStyle(.segmented)
+                .frame(width: 300)
             }
 
-            Divider()
-
-            SettingsBlock(title: L10n.tr("Link Opening")) {
+            SettingsBlock(title: t("Link Opening")) {
                 SetupChecklistRow(
-                    title: L10n.tr("PeekLink is default browser"),
+                    title: t("PeekLink is default browser"),
                     detail: defaultBrowserStatusText,
                     isComplete: isDefaultBrowser,
-                    actionTitle: L10n.tr("Open Settings"),
+                    actionTitle: t("Open Settings"),
                     action: Self.openDefaultBrowserSettings
                 )
 
                 SetupChecklistRow(
-                    title: L10n.tr("Test link opens through PeekLink"),
-                    detail: L10n.tr("Send a test URL through the same queue used by external links."),
+                    title: t("Test link opens through PeekLink"),
+                    detail: t("Send a test URL through the same queue used by external links."),
                     isComplete: isLastDeliveryQueued,
-                    actionTitle: L10n.tr("Open Test Link"),
+                    actionTitle: t("Open Test Link"),
                     action: openTestLink
                 )
 
@@ -78,35 +78,35 @@ struct SettingsView: View {
 
             Divider()
 
-            SettingsBlock(title: L10n.tr("Chrome Connection")) {
+            SettingsBlock(title: t("Chrome Connection")) {
                 SetupStepRow(
                     number: 1,
-                    title: L10n.tr("Open Chrome Extensions"),
-                    detail: L10n.tr("Turn on Developer mode in the top-right corner."),
-                    primaryTitle: L10n.tr("Open Extensions"),
+                    title: t("Open Chrome Extensions"),
+                    detail: t("Turn on Developer mode in the top-right corner."),
+                    primaryTitle: t("Open Extensions"),
                     primaryAction: Self.openChromeExtensions
                 )
 
                 SetupStepRow(
                     number: 2,
-                    title: L10n.tr("Load the PeekLink extension folder"),
+                    title: t("Load the PeekLink extension folder"),
                     detail: extensionInstallDetail,
-                    primaryTitle: L10n.tr("Reveal Folder"),
+                    primaryTitle: t("Reveal Folder"),
                     primaryAction: revealExtensionFolder
                 )
 
                 SetupStepRow(
                     number: 3,
-                    title: L10n.tr("Copy the extension ID"),
-                    detail: L10n.tr("After Chrome loads PeekLink Companion, copy the 32-letter ID shown on that extension card."),
+                    title: t("Copy the extension ID"),
+                    detail: t("After Chrome loads PeekLink Companion, copy the 32-letter ID shown on that extension card."),
                     primaryTitle: nil,
                     primaryAction: nil
                 )
 
-                Text(L10n.tr("Paste Extension ID"))
+                Text(t("Paste Extension ID"))
                     .font(.subheadline.weight(.medium))
 
-                TextField(L10n.tr("Paste the 32-character ID from chrome://extensions"), text: $chromeExtensionId)
+                TextField(t("Paste the 32-character ID from chrome://extensions"), text: $chromeExtensionId)
                     .textFieldStyle(.roundedBorder)
                     .font(.system(.body, design: .monospaced))
                     .onChange(of: chromeExtensionId) { newValue in
@@ -118,75 +118,73 @@ struct SettingsView: View {
                     .foregroundColor(isExtensionIdValid || !hasExtensionId ? .secondary : .red)
 
                 SetupChecklistRow(
-                    title: L10n.tr("Native bridge ready"),
+                    title: t("Native bridge ready"),
                     detail: bridgeStatusText,
                     isComplete: isBridgeReady,
-                    actionTitle: L10n.tr("Refresh"),
+                    actionTitle: t("Refresh"),
                     action: refreshBridge
                 )
             }
 
             Divider()
 
-            SettingsBlock(title: L10n.tr("Advanced")) {
+            SettingsBlock(title: t("Advanced")) {
                 HStack(spacing: 8) {
-                    Button(L10n.tr("Reveal Extension Folder"), action: revealExtensionFolder)
+                    Button(t("Reveal Extension Folder"), action: revealExtensionFolder)
                         .disabled(extensionSourcePath.isEmpty)
-                    Button(L10n.tr("Copy Manifest Path"), action: copyManifestPath)
+                    Button(t("Copy Manifest Path"), action: copyManifestPath)
                 }
-
-                Text(advancedStatusText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .truncationMode(.middle)
             }
 
             Spacer(minLength: 0)
-            }
         }
         .padding(22)
-        .frame(width: 640, height: 760)
+        .frame(width: 760, height: 720)
+        .id(appLanguage)
         .onAppear(perform: refreshSetupState)
     }
 
+    private func t(_ key: String) -> String {
+        L10n.tr(key, language: appLanguage)
+    }
+
     private var isLastDeliveryQueued: Bool {
-        lastDeliveryStatus == L10n.tr("Queued for Chrome native bridge.")
-            || lastDeliveryStatus == L10n.tr("Queued, but Chrome bridge is not configured.")
+        lastDeliveryStatus == t("Queued for Chrome native bridge.")
+            || lastDeliveryStatus == t("Queued, but Chrome bridge is not configured.")
             || lastDeliveryStatus == "Queued for Chrome native bridge."
             || lastDeliveryStatus == "Queued, but Chrome bridge is not configured."
     }
 
     private var bridgeStatusText: String {
         if !isExtensionIdValid {
-            return L10n.tr("Waiting for a valid extension ID.")
+            return t("Waiting for a valid extension ID.")
         }
 
-        return isBridgeReady ? L10n.tr("Native messaging manifest is installed.") : L10n.tr("Manifest needs to be refreshed.")
+        return isBridgeReady ? t("Native messaging manifest is installed.") : t("Manifest needs to be refreshed.")
     }
 
     private var defaultBrowserStatusText: String {
-        isDefaultBrowser ? L10n.tr("External http and https links route through PeekLink.") : L10n.tr("Set PeekLink as the default web browser in macOS.")
+        isDefaultBrowser ? t("External http and https links route through PeekLink.") : t("Set PeekLink as the default web browser in macOS.")
     }
 
     private var extensionIdHelpText: String {
         if !hasExtensionId {
-            return L10n.tr("This is the ID from the PeekLink Companion card in chrome://extensions.")
+            return t("This is the ID from the PeekLink Companion card in chrome://extensions.")
         }
 
         if isExtensionIdValid {
-            return L10n.tr("Saved. PeekLink will install the native messaging bridge for this extension.")
+            return t("Saved. PeekLink will install the native messaging bridge for this extension.")
         }
 
-        return L10n.tr("This does not match Chrome's extension ID format.")
+        return t("This does not match Chrome's extension ID format.")
     }
 
     private var extensionInstallDetail: String {
         if extensionSourcePath.isEmpty {
-            return L10n.tr("Click Load unpacked in Chrome, then select the PeekLink ChromeExtension folder.")
+            return t("Click Load unpacked in Chrome, then select the PeekLink ChromeExtension folder.")
         }
 
-        return L10n.tr("Click Reveal Folder, then in Chrome click Load unpacked and choose the revealed ChromeExtension folder.")
+        return t("Click Reveal Folder, then in Chrome click Load unpacked and choose the revealed ChromeExtension folder.")
     }
 
     private func normalizeAndInstallExtensionId(_ newValue: String) {
@@ -215,11 +213,6 @@ struct SettingsView: View {
     private func openTestLink() {
         NotificationCenter.default.post(name: Notification.Name("OpenTestLink"), object: nil)
         refreshSetupState()
-    }
-
-    private var advancedStatusText: String {
-        let extensionPath = extensionSourcePath.isEmpty ? L10n.tr("Extension folder path was not saved by install.sh.") : extensionSourcePath
-        return L10n.format("Extension folder: %@\nNative manifest: %@", extensionPath, NativeMessagingManifest.manifestPath())
     }
 
     private func revealExtensionFolder() {

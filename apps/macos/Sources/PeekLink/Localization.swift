@@ -5,6 +5,10 @@ enum L10n {
 
     static func tr(_ key: String) -> String {
         let language = UserDefaults.standard.string(forKey: languageKey) ?? "system"
+        return tr(key, language: language)
+    }
+
+    static func tr(_ key: String, language: String) -> String {
         guard language != "system",
               let path = Bundle.main.path(forResource: language, ofType: "lproj"),
               let bundle = Bundle(path: path) else {
@@ -16,5 +20,9 @@ enum L10n {
 
     static func format(_ key: String, _ arguments: CVarArg...) -> String {
         String(format: tr(key), locale: Locale.current, arguments: arguments)
+    }
+
+    static func format(_ key: String, language: String, _ arguments: CVarArg...) -> String {
+        String(format: tr(key, language: language), locale: Locale.current, arguments: arguments)
     }
 }
