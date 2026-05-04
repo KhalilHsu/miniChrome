@@ -30,7 +30,8 @@ struct SettingsView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("Setup")
                     .font(.title3.weight(.semibold))
@@ -66,13 +67,38 @@ struct SettingsView: View {
             Divider()
 
             SettingsBlock(title: "Chrome Connection") {
-                SetupChecklistRow(
-                    title: "Chrome extension loaded",
-                    detail: "Load the local PeekLink extension folder in Chrome.",
-                    isComplete: hasExtensionId,
-                    actionTitle: "Open Extensions",
-                    action: Self.openChromeExtensions
+                SetupStepRow(
+                    number: 1,
+                    title: "Open Chrome Extensions",
+                    detail: "Turn on Developer mode in the top-right corner.",
+                    primaryTitle: "Open Extensions",
+                    primaryAction: Self.openChromeExtensions,
+                    secondaryTitle: nil,
+                    secondaryAction: nil
                 )
+
+                SetupStepRow(
+                    number: 2,
+                    title: "Load the PeekLink extension folder",
+                    detail: extensionInstallDetail,
+                    primaryTitle: "Reveal Folder",
+                    primaryAction: revealExtensionFolder,
+                    secondaryTitle: "Copy Path",
+                    secondaryAction: copyExtensionFolderPath
+                )
+
+                SetupStepRow(
+                    number: 3,
+                    title: "Copy the extension ID",
+                    detail: "After Chrome loads PeekLink Companion, copy the 32-letter ID shown on that extension card.",
+                    primaryTitle: nil,
+                    primaryAction: nil,
+                    secondaryTitle: nil,
+                    secondaryAction: nil
+                )
+
+                Text("Paste Extension ID")
+                    .font(.subheadline.weight(.medium))
 
                 TextField("Paste the 32-character ID from chrome://extensions", text: $chromeExtensionId)
                     .textFieldStyle(.roundedBorder)
@@ -111,18 +137,11 @@ struct SettingsView: View {
             }
 
             Spacer(minLength: 0)
+            }
         }
         .padding(22)
-        .frame(width: 590, height: 650)
+        .frame(width: 640, height: 760)
         .onAppear(perform: refreshSetupState)
-    }
-
-    private var extensionIdStatusText: String {
-        if !hasExtensionId {
-            return "Paste the ID Chrome shows for the unpacked PeekLink extension."
-        }
-
-        return isExtensionIdValid ? "ID format looks correct." : "The ID should be 32 lowercase letters from Chrome."
     }
 
     private var bridgeStatusText: String {
@@ -139,7 +158,7 @@ struct SettingsView: View {
 
     private var extensionIdHelpText: String {
         if !hasExtensionId {
-            return "Open chrome://extensions, enable Developer mode, load extension/chrome, then copy its ID."
+            return "This is the ID from the PeekLink Companion card in chrome://extensions."
         }
 
         if isExtensionIdValid {
@@ -147,6 +166,14 @@ struct SettingsView: View {
         }
 
         return "This does not match Chrome's extension ID format."
+    }
+
+    private var extensionInstallDetail: String {
+        if extensionSourcePath.isEmpty {
+            return "Click Load unpacked in Chrome, then select the PeekLink ChromeExtension folder."
+        }
+
+        return "Click Load unpacked in Chrome, then select this folder: \(extensionSourcePath)"
     }
 
     private func normalizeAndInstallExtensionId(_ newValue: String) {
@@ -185,6 +212,12 @@ struct SettingsView: View {
     private func revealExtensionFolder() {
         guard !extensionSourcePath.isEmpty else { return }
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: extensionSourcePath)])
+    }
+
+    private func copyExtensionFolderPath() {
+        guard !extensionSourcePath.isEmpty else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(extensionSourcePath, forType: .string)
     }
 
     private func copyManifestPath() {
@@ -280,6 +313,49 @@ private struct SetupChecklistRow: View {
             if let actionTitle, let action {
                 Button(actionTitle, action: action)
                     .controlSize(.small)
+            }
+        }
+    }
+}
+
+private struct SetupStepRow: View {
+    let number: Int
+    let title: String
+    let detail: String
+    let primaryTitle: String?
+    let primaryAction: (() -> Void)?
+    let secondaryTitle: String?
+    let secondaryAction: (() -> Void)?
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Text("\(number)")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 20, height: 20)
+                .background(Circle().fill(Color.accentColor))
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.body.weight(.medium))
+                Text(detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 12)
+
+            HStack(spacing: 6) {
+                if let secondaryTitle, let secondaryAction {
+                    Button(secondaryTitle, action: secondaryAction)
+                        .controlSize(.small)
+                }
+
+                if let primaryTitle, let primaryAction {
+                    Button(primaryTitle, action: primaryAction)
+                        .controlSize(.small)
+                }
             }
         }
     }
