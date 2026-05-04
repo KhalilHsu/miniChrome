@@ -4,7 +4,7 @@ import os.log
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     @AppStorage("chromeExtensionId") private var chromeExtensionId: String = ""
-    @AppStorage("lastDeliveryStatus") private var lastDeliveryStatus: String = "No links delivered yet."
+    @AppStorage("lastDeliveryStatus") private var lastDeliveryStatus: String = L10n.tr("No links delivered yet.")
     @AppStorage("lastDeliveryURL") private var lastDeliveryURL: String = ""
     @AppStorage("lastDeliveryDate") private var lastDeliveryDate: String = ""
 
@@ -46,7 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let extId = chromeExtensionId.trimmingCharacters(in: .whitespacesAndNewlines)
         if extId.isEmpty || !isValidExtensionId(extId) {
             logger.warning("Native messaging bridge not configured, URL queued: \(urlString)")
-            recordDeliveryStatus("Queued, but Chrome bridge is not configured.", url: urlString)
+            recordDeliveryStatus(L10n.tr("Queued, but Chrome bridge is not configured."), url: urlString)
             showBridgeMissingAlert()
         }
 
@@ -54,11 +54,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             try BridgeQueue.append(urlString: urlString)
             logger.info("Queued URL for native bridge: \(urlString)")
             if isValidExtensionId(extId) {
-                recordDeliveryStatus("Queued for Chrome native bridge.", url: urlString)
+                recordDeliveryStatus(L10n.tr("Queued for Chrome native bridge."), url: urlString)
             }
         } catch {
             logger.error("Failed to queue URL: \(error.localizedDescription)")
-            recordDeliveryStatus("Failed to queue URL: \(error.localizedDescription)", url: urlString)
+            recordDeliveryStatus(L10n.format("Failed to queue URL: %@", error.localizedDescription), url: urlString)
             showQueueErrorAlert(error, url: urlString)
         }
     }
@@ -99,11 +99,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showBridgeMissingAlert() {
         DispatchQueue.main.async {
             let alert = NSAlert()
-            alert.messageText = "PeekLink Bridge Not Ready"
-            alert.informativeText = "Set your Chrome Extension ID in PeekLink Settings so the native messaging bridge can be installed."
+            alert.messageText = L10n.tr("PeekLink Bridge Not Ready")
+            alert.informativeText = L10n.tr("Set your Chrome Extension ID in PeekLink Settings so the native messaging bridge can be installed.")
             alert.alertStyle = .warning
-            alert.addButton(withTitle: "Open Settings")
-            alert.addButton(withTitle: "Cancel")
+            alert.addButton(withTitle: L10n.tr("Open Settings"))
+            alert.addButton(withTitle: L10n.tr("Cancel"))
 
             NSApp.activate(ignoringOtherApps: true)
             let response = alert.runModal()
@@ -116,16 +116,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func showQueueErrorAlert(_ error: Error, url: String) {
         DispatchQueue.main.async {
             let alert = NSAlert()
-            alert.messageText = "Failed to Queue URL"
-            alert.informativeText = """
-            Could not save the URL for delivery to Chrome.
-            Error: \(error.localizedDescription)
-
-            URL: \(url)
-            """
+            alert.messageText = L10n.tr("Failed to Queue URL")
+            alert.informativeText = L10n.format("Could not save the URL for delivery to Chrome.\nError: %@\n\nURL: %@", error.localizedDescription, url)
             alert.alertStyle = .critical
-            alert.addButton(withTitle: "Copy URL")
-            alert.addButton(withTitle: "Dismiss")
+            alert.addButton(withTitle: L10n.tr("Copy URL"))
+            alert.addButton(withTitle: L10n.tr("Dismiss"))
 
             NSApp.activate(ignoringOtherApps: true)
             let response = alert.runModal()

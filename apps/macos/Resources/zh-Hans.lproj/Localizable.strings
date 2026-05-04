@@ -1,0 +1,56 @@
+"Settings" = "设置";
+"Quit PeekLink" = "退出 PeekLink";
+
+"No links delivered yet." = "还没有发送过链接。";
+"Queued, but Chrome bridge is not configured." = "已加入队列，但 Chrome 桥接还没配置好。";
+"Queued for Chrome native bridge." = "已发送到 Chrome 原生桥接。";
+"Failed to queue URL: %@" = "链接加入队列失败：%@";
+
+"PeekLink Bridge Not Ready" = "PeekLink 桥接还没准备好";
+"Set your Chrome Extension ID in PeekLink Settings so the native messaging bridge can be installed." = "请先在 PeekLink 设置里填写 Chrome 扩展 ID，这样才能安装原生消息桥接。";
+"Open Settings" = "打开设置";
+"Cancel" = "取消";
+"Failed to Queue URL" = "链接加入队列失败";
+"Could not save the URL for delivery to Chrome.\nError: %@\n\nURL: %@" = "无法保存这个链接并发送给 Chrome。\n错误：%@\n\nURL：%@";
+"Copy URL" = "复制链接";
+"Dismiss" = "关闭";
+
+"Setup" = "设置向导";
+"Finish these once, then external links can open in Mini Chrome." = "完成这些步骤后，外部链接就可以先用 Mini Chrome 打开。";
+"Language" = "语言";
+"App Language" = "App 语言";
+"Follow System" = "跟随系统";
+"Link Opening" = "链接打开";
+"PeekLink is default browser" = "PeekLink 是默认浏览器";
+"External http and https links route through PeekLink." = "外部 http 和 https 链接会经过 PeekLink。";
+"Set PeekLink as the default web browser in macOS." = "在 macOS 里把 PeekLink 设置为默认网页浏览器。";
+"Test link opens through PeekLink" = "测试链接通过 PeekLink 打开";
+"Send a test URL through the same queue used by external links." = "发送一个测试链接，走和外部链接一样的队列。";
+"Open Test Link" = "打开测试链接";
+
+"Chrome Connection" = "Chrome 连接";
+"Open Chrome Extensions" = "打开 Chrome 扩展页";
+"Turn on Developer mode in the top-right corner." = "打开右上角的开发者模式。";
+"Open Extensions" = "打开扩展页";
+"Load the PeekLink extension folder" = "加载 PeekLink 扩展文件夹";
+"Reveal Folder" = "显示文件夹";
+"Copy the extension ID" = "复制扩展 ID";
+"After Chrome loads PeekLink Companion, copy the 32-letter ID shown on that extension card." = "Chrome 加载 PeekLink Companion 后，复制扩展卡片上显示的 32 位 ID。";
+"Paste Extension ID" = "粘贴扩展 ID";
+"Paste the 32-character ID from chrome://extensions" = "粘贴 chrome://extensions 里的 32 位 ID";
+"Native bridge ready" = "原生桥接已就绪";
+"Refresh" = "刷新";
+"Waiting for a valid extension ID." = "等待有效的扩展 ID。";
+"Native messaging manifest is installed." = "原生消息 manifest 已安装。";
+"Manifest needs to be refreshed." = "Manifest 需要刷新。";
+"This is the ID from the PeekLink Companion card in chrome://extensions." = "这是 chrome://extensions 里 PeekLink Companion 卡片上的 ID。";
+"Saved. PeekLink will install the native messaging bridge for this extension." = "已保存。PeekLink 会为这个扩展安装原生消息桥接。";
+"This does not match Chrome's extension ID format." = "这不符合 Chrome 扩展 ID 的格式。";
+"Click Load unpacked in Chrome, then select the PeekLink ChromeExtension folder." = "在 Chrome 里点击“加载已解压的扩展程序”，然后选择 PeekLink 的 ChromeExtension 文件夹。";
+"Click Reveal Folder, then in Chrome click Load unpacked and choose the revealed ChromeExtension folder." = "先点击“显示文件夹”，然后在 Chrome 里点击“加载已解压的扩展程序”，选择刚刚显示出来的 ChromeExtension 文件夹。";
+
+"Advanced" = "高级";
+"Reveal Extension Folder" = "显示扩展文件夹";
+"Copy Manifest Path" = "复制 Manifest 路径";
+"Extension folder path was not saved by install.sh." = "install.sh 还没有保存扩展文件夹路径。";
+"Extension folder: %@\nNative manifest: %@" = "扩展文件夹：%@\n原生 manifest：%@";

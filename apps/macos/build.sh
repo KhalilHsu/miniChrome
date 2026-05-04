@@ -33,4 +33,9 @@ echo "Copying brand assets..."
 cp "${ASSET_DIR}/AppIcon.icns" "${APP_BUNDLE}/Contents/Resources/"
 cp "${ASSET_DIR}/MenuBarIcon.icns" "${APP_BUNDLE}/Contents/Resources/"
 
+if [ -d "Resources" ]; then
+    echo "Copying localized resources..."
+    cp -R Resources/*.lproj "${APP_BUNDLE}/Contents/Resources/" 2>/dev/null || true
+fi
+
 echo "Done! App created at ${APP_BUNDLE}"

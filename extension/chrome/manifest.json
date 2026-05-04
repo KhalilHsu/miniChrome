@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "PeekLink Companion",
+  "name": "__MSG_extensionName__",
   "version": "0.1.0",
-  "description": "Opens links in Mini Chrome windows for PeekLink.",
+  "default_locale": "en",
+  "description": "__MSG_extensionDescription__",
   "permissions": [
     "contextMenus",
     "nativeMessaging",
@@ -22,21 +23,21 @@
         "default": "Ctrl+Shift+M",
         "mac": "Command+Shift+M"
       },
-      "description": "Open the current tab in a Mini window"
+      "description": "__MSG_openCurrentTabCommand__"
     },
     "promote-mini-window": {
       "suggested_key": {
         "default": "Ctrl+Shift+P",
         "mac": "Command+Shift+P"
       },
-      "description": "Promote Mini window to Main Chrome"
+      "description": "__MSG_promoteMiniWindowCommand__"
     },
     "close-mini-window": {
       "suggested_key": {
         "default": "Ctrl+Shift+W",
         "mac": "Command+Shift+W"
       },
-      "description": "Close Mini window"
+      "description": "__MSG_closeMiniWindowCommand__"
     }
   },
   "content_scripts": [
@@ -47,7 +48,7 @@
     }
   ],
   "action": {
-    "default_title": "PeekLink",
+    "default_title": "__MSG_actionTitle__",
     "default_icon": {
       "16": "icons/icon_16.png",
       "32": "icons/icon_32.png",

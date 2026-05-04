@@ -11,7 +11,7 @@ struct PeekLinkApp: App {
     }
 
     var body: some Scene {
-        Window("Settings", id: "settings") {
+        Window(L10n.tr("Settings"), id: "settings") {
             SettingsView()
                 .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OpenSettings"))) { _ in
                     openWindow(id: "settings")
@@ -19,12 +19,12 @@ struct PeekLinkApp: App {
         }
 
         MenuBarExtra("PeekLink", systemImage: "link") {
-            Button("Settings") {
+            Button(L10n.tr("Settings")) {
                 openWindow(id: "settings")
                 NSApp.activate(ignoringOtherApps: true)
             }
             Divider()
-            Button("Quit PeekLink") {
+            Button(L10n.tr("Quit PeekLink")) {
                 NSApplication.shared.terminate(nil)
             }
         }

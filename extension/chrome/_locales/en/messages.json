@@ -1,0 +1,23 @@
+{
+  "extensionName": {
+    "message": "PeekLink Companion"
+  },
+  "extensionDescription": {
+    "message": "Opens links in Mini Chrome windows for PeekLink."
+  },
+  "openCurrentTabCommand": {
+    "message": "Open the current tab in a Mini window"
+  },
+  "promoteMiniWindowCommand": {
+    "message": "Promote Mini window to Main Chrome"
+  },
+  "closeMiniWindowCommand": {
+    "message": "Close Mini window"
+  },
+  "actionTitle": {
+    "message": "PeekLink"
+  },
+  "promoteToChromeButton": {
+    "message": "Promote to Chrome (⌘Enter)"
+  }
+}

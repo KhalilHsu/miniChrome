@@ -1,0 +1,23 @@
+{
+  "extensionName": {
+    "message": "PeekLink Companion"
+  },
+  "extensionDescription": {
+    "message": "用 PeekLink 在 Mini Chrome 窗口里打开链接。"
+  },
+  "openCurrentTabCommand": {
+    "message": "在 Mini 窗口打开当前标签页"
+  },
+  "promoteMiniWindowCommand": {
+    "message": "把 Mini 窗口提升到主 Chrome"
+  },
+  "closeMiniWindowCommand": {
+    "message": "关闭 Mini 窗口"
+  },
+  "actionTitle": {
+    "message": "PeekLink"
+  },
+  "promoteToChromeButton": {
+    "message": "提升到 Chrome (⌘Enter)"
+  }
+}
