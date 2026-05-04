@@ -92,14 +92,30 @@ enum NativeMessagingManifest {
         )
 
         let data = try JSONEncoder().encode(manifest)
-        let url = try manifestURL()
+        let url = manifestURL()
         try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: nil)
         try data.write(to: url, options: .atomic)
     }
 
-    private static func manifestURL() throws -> URL {
+    static func isInstalled(for extensionId: String) -> Bool {
+        guard let data = try? Data(contentsOf: manifestURL()),
+              let manifest = try? JSONDecoder().decode(Manifest.self, from: data) else {
+            return false
+        }
+
+        return manifest.name == hostName
+            && manifest.path == hostBinaryPath().path
+            && manifest.allowedOrigins.contains("chrome-extension://\(extensionId)/")
+    }
+
+    static func manifestPath() -> String {
+        manifestURL().path
+    }
+
+    private static func manifestURL() -> URL {
         let fm = FileManager.default
-        let base = try fm.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+        let base = (try? fm.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true))
+            ?? fm.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support", isDirectory: true)
         let chromeDir = base
             .appendingPathComponent("Google", isDirectory: true)
             .appendingPathComponent("Chrome", isDirectory: true)
