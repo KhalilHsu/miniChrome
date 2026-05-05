@@ -1,11 +1,14 @@
 #!/bin/bash
 set -e
 
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+PROJECT_ROOT="$SCRIPT_DIR"
+
 echo "🚀 Installing PeekLink macOS App..."
 
 LSREGISTER="/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
 INSTALL_PATH="/Applications/PeekLink.app"
-PROJECT_ROOT=$(pwd)
 EXTENSION_PATH="$PROJECT_ROOT/extension/chrome"
 EXTENSION_INSTALL_PATH="$HOME/Library/Application Support/PeekLink/ChromeExtension"
 
