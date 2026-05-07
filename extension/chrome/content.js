@@ -1,3 +1,5 @@
+let miniCheckTimer = null;
+
 // Only run logic if we are actually in a Mini window
 chrome.runtime.sendMessage({ action: "checkMiniWindow" }, (response) => {
   if (response && response.isMiniWindow) {
@@ -85,7 +87,7 @@ function injectOverlay() {
     </svg>
     <span>${promoteLabel}</span>
   `;
-  
+
   promoteBtn.onclick = () => {
     chrome.runtime.sendMessage({ action: "promoteCurrentWindow" });
   };
@@ -96,18 +98,48 @@ function injectOverlay() {
   container.appendChild(promoteBtn);
   document.body.appendChild(container);
 
-  // Listen for Command+Enter on the page itself
-  document.addEventListener('keydown', (e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter' && document.activeElement !== addressBar) {
-      chrome.runtime.sendMessage({ action: "promoteCurrentWindow" });
-    }
-  });
-
-  // Intercept all clicks on links to prevent opening in a new tab/window
-  document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (link && link.target === '_blank') {
-      link.target = '_self';
-    }
-  }, true);
+  // Poll every 500ms: if this tab is no longer a mini window, remove the overlay
+  miniCheckTimer = setInterval(() => {
+    chrome.runtime.sendMessage({ action: "checkMiniWindow" }, (response) => {
+      if (!response || !response.isMiniWindow) {
+        removeOverlay();
+      }
+    });
+  }, 500);
 }
+
+// Remove overlay with animation
+function removeOverlay() {
+  const existing = document.getElementById('peeklink-overlay-container');
+  if (existing) {
+    existing.style.opacity = '0';
+    existing.style.transform = 'translateY(-10px)';
+    setTimeout(() => existing.remove(), 300);
+  }
+  if (miniCheckTimer) {
+    clearInterval(miniCheckTimer);
+    miniCheckTimer = null;
+  }
+}
+
+// Also listen for explicit hide message from service worker
+chrome.runtime.onMessage.addListener((message) => {
+  if (message.action === "hideOverlay") {
+    removeOverlay();
+  }
+});
+
+// Listen for Command+Enter on the page itself
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    chrome.runtime.sendMessage({ action: "promoteCurrentWindow" });
+  }
+});
+
+// Intercept all clicks on links to prevent opening in a new tab/window
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a');
+  if (link && link.target === '_blank') {
+    link.target = '_self';
+  }
+}, true);

@@ -1,5 +1,6 @@
 const MINI_WINDOW_IDS_KEY = "miniWindowIds";
 const MINI_WINDOW_SESSION_KEY = "miniWindowIdsSession";
+const PROMOTING_WINDOW_IDS_KEY = "promotingWindowIds";
 const NATIVE_HOST_NAME = "com.peeklink.bridge";
 const LOG_PREFIX = "[PeekLink]";
 let nativePort = null;
@@ -158,6 +159,11 @@ chrome.webNavigation.onCreatedNavigationTarget.addListener(async (details) => {
 });
 
 async function isMiniWindow(windowId, tab) {
+  const promotingIds = await getPromotingWindowIds();
+  if (promotingIds.includes(windowId)) {
+    return false;
+  }
+
   const ids = await getMiniWindowIds();
   if (ids.includes(windowId)) return true;
 
@@ -230,6 +236,9 @@ async function promoteMiniWindow(windowId, tabId) {
   }
 
   try {
+    await setPromotingWindowIds([...new Set([...(await getPromotingWindowIds()), windowId])]);
+    await hideOverlayInTab(tabId);
+
     const normalWindows = await chrome.windows.getAll({ windowTypes: ["normal"] });
     let targetWindow = null;
 
@@ -250,9 +259,13 @@ async function promoteMiniWindow(windowId, tabId) {
       await chrome.windows.create({ tabId: tabId, type: "normal", focused: true });
     }
 
+    // Notify the tab to hide its overlay now that it has been promoted.
+    await hideOverlayInTab(tabId);
+
     logInfo("Promoted tab", tabId, "from mini window", windowId);
 
     await removeFromMiniWindowIds(windowId);
+    await removeFromPromotingWindowIds(windowId);
 
     try {
       await chrome.windows.remove(windowId);
@@ -260,7 +273,16 @@ async function promoteMiniWindow(windowId, tabId) {
       logWarn("Mini window already closed during promote:", e.message);
     }
   } catch (e) {
+    await removeFromPromotingWindowIds(windowId);
     logError("Promote failed:", e.message, { windowId, tabId });
+  }
+}
+
+async function hideOverlayInTab(tabId) {
+  try {
+    await chrome.tabs.sendMessage(tabId, { action: "hideOverlay" });
+  } catch (e) {
+    logWarn("Failed to send hideOverlay message:", e.message);
   }
 }
 
@@ -281,6 +303,22 @@ async function removeFromMiniWindowIds(windowId) {
   await setMiniWindowIds(ids.filter((id) => id !== windowId));
   const sessionIds = await getSessionWindowIds();
   await setSessionWindowIds(sessionIds.filter((id) => id !== windowId));
+}
+
+async function getPromotingWindowIds() {
+  const data = await chrome.storage.session.get(PROMOTING_WINDOW_IDS_KEY);
+  return data[PROMOTING_WINDOW_IDS_KEY] ?? [];
+}
+
+async function setPromotingWindowIds(ids) {
+  await chrome.storage.session.set({
+    [PROMOTING_WINDOW_IDS_KEY]: ids
+  });
+}
+
+async function removeFromPromotingWindowIds(windowId) {
+  const ids = await getPromotingWindowIds();
+  await setPromotingWindowIds(ids.filter((id) => id !== windowId));
 }
 
 async function getMiniWindowIds() {
